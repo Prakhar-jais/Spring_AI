@@ -5,8 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -15,6 +20,39 @@ public class AIService {
 
 
     private final ChatClient chatClient;
+
+    private final EmbeddingModel embeddingModel;
+
+    private final VectorStore vectorStore;
+
+    public float[] getEmbeddings(String text){
+        return embeddingModel.embed(text);
+    }
+
+//    public void ingestDataToVectorStore(String text){
+//        Document document = new Document(text);
+//        vectorStore.add(List.of(document));
+//    }
+    public void ingestDataToVectorStore(){
+        List<Document> movies = List.of(
+                new Document("A thief who steals corporate secrets through dream sharing tech.",Map.of("title","Inception","genre","sci-fi","year",2010)),
+                new Document("A team of explorers travel through a blackhole in space to ensure humaniy survival.",Map.of("title","Intersteller","genre","sci-fi","year",2014)),
+                new Document("A poor passionate young men falls in love iwth rich young woman, giving her sense of freedom.",Map.of("title","The Notebook","genre","romance","year",2004))
+        ) ;
+
+        vectorStore.add(movies);
+
+    }
+
+    public List<Document> similaritySearch(String text){
+
+        return vectorStore.similaritySearch(SearchRequest.builder()
+                .query(text)
+                .topK(3)
+                .similarityThreshold(0.3)
+                .build());
+
+    }
 
     public String getJoke(String topic){
 
