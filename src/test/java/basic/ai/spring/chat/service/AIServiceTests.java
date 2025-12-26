@@ -32,9 +32,24 @@ public class AIServiceTests {
 //    }
     @Test
     public void testStoreData(){
+        aiservice.ingestDataToVectorStore();
+    }
+
+    @Test
+    public void testSimilaritySearch(){
         var res = aiservice.similaritySearch("space movie");
         for(Document val:res){
             System.out.println(val);
+
+        }
+    }
+
+    @Test
+    public void testAskAI(){
+//        var response = aiservice.askAI("what is the role of stand up comedian ");
+        var response = aiservice.askAI("what is the role of spring ai developer");
+
+        System.out.println(response);
 
         }
     }

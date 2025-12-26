@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,67 @@ public class AIService {
 //        Document document = new Document(text);
 //        vectorStore.add(List.of(document));
 //    }
+
+
+    public String askAI(String prompt){
+
+        String template = """
+                You are an AI assistant halping a developer.
+                Rules:
+                - Use ONLY provided information in the context 
+                - You may rephrase, summarize, and explain in natural language
+                - Do not introduce new concepts or facts
+                - If multiple context sections are relevant, combine them into single explanation.
+                - If the answer is not present, say "I don't know"
+                
+                Context:
+                {context}
+                
+                Answer in a friendly, conversational tone.
+                """;
+
+        List<Document> documents = vectorStore.similaritySearch(SearchRequest.builder()
+                .query(prompt)
+                .topK(2)
+                .filterExpression("topic == 'ai' or topic == 'vectorstore'")
+                .build());
+        String context =  documents.stream().map(Document::getText).collect(Collectors.joining("\n\n"));
+        PromptTemplate promptTemplate = new PromptTemplate(template);
+        String system = promptTemplate.render(Map.of("context",context));
+
+
+        return chatClient.prompt()
+                .system(system)
+                .user(prompt)
+                .advisors(new SimpleLoggerAdvisor())
+                .call()
+                .content();
+    }
+
+    public static List<Document> ingestSpringAiDocs(){
+        List<Document> springAiDocs = List.of(
+                new Document("Introduction to Spring AI and its integration with the Spring ecosystem.",
+                        Map.of("title","Spring AI Overview","category","documentation","year",2023)),
+
+                new Document("Guide to configuring OpenAI and Azure OpenAI models with Spring AI.",
+                        Map.of("title","Model Configuration","category","setup","year",2023)),
+
+                new Document("Learn how to use Prompt Templates for dynamic AI-driven responses.",
+                        Map.of("title","Prompt Templates","category","usage","year",2023)),
+
+                new Document("Step-by-step tutorial on building chat applications with Spring AI.",
+                        Map.of("title","Chat Applications","category","tutorial","year",2023)),
+
+                new Document("Explanation of embedding models and vector stores for semantic search.",
+                        Map.of("title","Embeddings & Vector Stores","category","advanced","year",2023)),
+
+                new Document("Walkthrough on integrating Spring AI with external APIs and services.",
+                        Map.of("title","API Integration","category","integration","year",2023))
+        );
+        return springAiDocs;
+
+    }
+
     public void ingestDataToVectorStore(){
         List<Document> movies = List.of(
                 new Document("A thief who steals corporate secrets through dream sharing tech.",Map.of("title","Inception","genre","sci-fi","year",2010)),
@@ -41,6 +103,7 @@ public class AIService {
         ) ;
 
         vectorStore.add(movies);
+        vectorStore.add(ingestSpringAiDocs());
 
     }
 
