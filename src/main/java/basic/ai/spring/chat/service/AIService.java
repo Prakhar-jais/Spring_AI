@@ -36,40 +36,6 @@ public class AIService {
 //    }
 
 
-    public String askAI(String prompt){
-
-        String template = """
-                You are an AI assistant halping a developer.
-                Rules:
-                - Use ONLY provided information in the context 
-                - You may rephrase, summarize, and explain in natural language
-                - Do not introduce new concepts or facts
-                - If multiple context sections are relevant, combine them into single explanation.
-                - If the answer is not present, say "I don't know"
-                
-                Context:
-                {context}
-                
-                Answer in a friendly, conversational tone.
-                """;
-
-        List<Document> documents = vectorStore.similaritySearch(SearchRequest.builder()
-                .query(prompt)
-                .topK(2)
-                .filterExpression("topic == 'ai' or topic == 'vectorstore'")
-                .build());
-        String context =  documents.stream().map(Document::getText).collect(Collectors.joining("\n\n"));
-        PromptTemplate promptTemplate = new PromptTemplate(template);
-        String system = promptTemplate.render(Map.of("context",context));
-
-
-        return chatClient.prompt()
-                .system(system)
-                .user(prompt)
-                .advisors(new SimpleLoggerAdvisor())
-                .call()
-                .content();
-    }
 
     public static List<Document> ingestSpringAiDocs(){
         List<Document> springAiDocs = List.of(
@@ -155,5 +121,6 @@ public class AIService {
 
         return response.text();
     }
+
 
 }

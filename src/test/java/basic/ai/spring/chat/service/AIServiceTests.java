@@ -44,13 +44,13 @@ public class AIServiceTests {
         }
     }
 
-    @Test
-    public void testAskAI(){
-//        var response = aiservice.askAI("what is the role of stand up comedian ");
-        var response = aiservice.askAI("what is the role of spring ai developer");
-
-        System.out.println(response);
-
-        }
-    }
+//    @Test
+//    public void testAskAI(){
+////        var response = aiservice.askAI("what is the role of stand up comedian ");
+//        var response = aiservice.askAI("what is the role of spring ai developer");
+//
+//        System.out.println(response);
+//
+//        }
+//    }
 }
